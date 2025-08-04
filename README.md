@@ -200,98 +200,104 @@ To get started with ESPHome, follow these steps:
   # template from https://github.com/limengdu/MR60BHA2_ESPHome_external_components
 
   substitutions:
-    name: "seeedstudio-mr60bha2-kit"
-    friendly_name: "Seeed Studio MR60BHA2 Kit"
+  name: "seeedstudio-mr60bha2-kit"
+  friendly_name: "Seeed Studio MR60BHA2 Kit"
 
-  esphome:
-    name: "${name}"
-    friendly_name: "${friendly_name}"
-    name_add_mac_suffix: true
-    project:
-      name: "seeedstudio.mr60bha2_kit"
-      version: "2.0"
-    platformio_options:
-      board_upload.maximum_size: 4194304
-    min_version: "2024.3.2" # Fix logger compile error on ESP32-C6 esphome#6323
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
+  project:
+    name: "seeedstudio.mr60bha2_kit"
+    version: "3.5"
+  platformio_options:
+    board_upload.maximum_size: 4194304
+  min_version: "2024.3.2" # Fix logger compile error on ESP32-C6 esphome#6323
 
-  esp32:
-    board: esp32-c6-devkitc-1
-    variant: esp32c6
-    flash_size: 4MB # upload.flash_size
-    framework:
-      type: esp-idf
+esp32:
+  board: esp32-c6-devkitc-1
+  variant: esp32c6
+  flash_size: 4MB # upload.flash_size
+  framework:
+    type: esp-idf
 
-  external_components:
-    - source:
-        type: git
-        url: https://github.com/limengdu/MR60BHA2_ESPHome_external_components
-        ref: main
-      components: [ seeed_mr60bha2 ]
-      refresh: 0s
+external_components:
+  - source:
+      type: git
+      url: https://github.com/limengdu/MR60BHA2_ESPHome_external_components
+      ref: main
+    components: [ seeed_mr60bha2 ]
+    refresh: 0s
 
-  # Enable logging
-  logger:
-    hardware_uart: USB_SERIAL_JTAG
-    level: DEBUG
+# Enable logging
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+  level: DEBUG
 
-  # Enable Home Assistant API
-  api:
+# Enable Home Assistant API
+api:
 
-  ota:
-    - platform: esphome
+ota:
+  - platform: esphome
 
-  wifi:
-    # Enable fallback hotspot (captive portal) in case wifi connection fails
-    ap:
-      ssid: "seeedstudio-mr60bha2"
+wifi:
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "seeedstudio-mr60bha2"
 
-  captive_portal:
+captive_portal:
 
-  # For XIAO ESP32C6 Onboard LED
-  # light:
-  #   - platform: status_led
-  #     name: "Switch state"
-  #     pin: GPIO15
+# For XIAO ESP32C6 Onboard LED
+# light:
+#   - platform: status_led
+#     name: "Switch state"
+#     pin: GPIO15
 
-  light:
-    - platform: esp32_rmt_led_strip
-      id: led_ring
-      name: "Seeed MR60BHA2 RGB Light"
-      pin: GPIO1
-      num_leds: 1
-      rmt_channel: 0
-      rgb_order: GRB
-      chipset: ws2812
+light:
+  - platform: esp32_rmt_led_strip
+    id: led_ring
+    name: "Seeed MR60BHA2 RGB Light"
+    pin: GPIO1
+    num_leds: 1
+    rgb_order: GRB
+    chipset: ws2812
 
-  i2c:
-    sda: GPIO22
-    scl: GPIO23
-    scan: true
-    id: bus_a
+i2c:
+  sda: GPIO22
+  scl: GPIO23
+  scan: true
+  id: bus_a
 
-  uart:
-    id: uart_bus
-    baud_rate: 115200
-    rx_pin: 17
-    tx_pin: 16
-    parity: NONE
-    stop_bits: 1
+uart:
+  id: uart_bus
+  baud_rate: 115200
+  rx_pin: 17
+  tx_pin: 16
+  parity: NONE
+  stop_bits: 1
 
-  seeed_mr60bha2:
-    id: my_seeed_mr60bha2
+seeed_mr60bha2:
+  id: my_seeed_mr60bha2
 
-  sensor:
-    - platform: bh1750
-      name: "Seeed MR60BHA2 Illuminance"
-      address: 0x23
-      update_interval: 1s
-    - platform: seeed_mr60bha2
-      breath_rate:
-        name: "Real-time respiratory rate"
-      heart_rate:
-        name: "Real-time heart rate"
-      distance:
-        name: "Distance to detection object"
+binary_sensor:
+  - platform: seeed_mr60bha2
+    has_target:
+      name: "Person Information"
+
+sensor:
+  - platform: bh1750
+    name: "Seeed MR60BHA2 Illuminance"
+    address: 0x23
+    update_interval: 1s
+  - platform: seeed_mr60bha2
+    breath_rate:
+      name: "Real-time respiratory rate"
+    heart_rate:
+      name: "Real-time heart rate"
+    distance:
+      name: "Distance to detection object"
+    num_targets:
+      name: "Target Number"
   ```
 
 3. **Customize Functionality**: You can enhance the sensor's capabilities by exploring various features available in ESPHome, allowing for flexible adjustments to suit your specific needs.
