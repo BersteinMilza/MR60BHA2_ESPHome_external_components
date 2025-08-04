@@ -197,7 +197,7 @@ To get started with ESPHome, follow these steps:
 2. **Create a New Configuration**: Click on the device to open its configuration. Here, you can adjust settings such as the sensor's sensitivity, reporting intervals, and output formats. ESPHome uses a YAML configuration format, which is user-friendly and allows you to define various parameters. You can use the following template YAML file as a starting point for your configuration, which is designed specifically for the MR60BHA2 Sensor:
 
   ```yaml showLineNumbers title=example/mr60bha2.yaml
-  # template from https://github.com/limengdu/MR60BHA2_ESPHome_external_components
+  # template from https://github.com/limengdu/MR60BHA2_ESPHome_external_components/blob/main/example/mr60bha2.yaml
 
   substitutions:
   name: "seeedstudio-mr60bha2-kit"
