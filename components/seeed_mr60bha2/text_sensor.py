@@ -3,7 +3,7 @@ from esphome.components import text_sensor
 import esphome.config_validation as cv
 from esphome.const import (
     ICON_CHIP,
-    ICON_INFORMATION_OUTLINE,
+    ICON_INFORMATION,
 )
 
 from . import CONF_MR60BHA2_ID, MR60BHA2Component
