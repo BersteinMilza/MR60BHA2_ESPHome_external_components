@@ -64,7 +64,6 @@ CONFIG_SCHEMA = cv.Schema(
             state_class=STATE_CLASS_MEASUREMENT,
             icon=ICON_ROTATE_RIGHT,
         ),
-        ),
     }
 )
 
