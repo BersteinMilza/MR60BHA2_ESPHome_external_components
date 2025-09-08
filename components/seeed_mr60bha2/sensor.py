@@ -15,7 +15,7 @@ from esphome.const import (
     CONF_X,
     CONF_Y,
     UNIT_METER,
-    ICON_AXIS_ARROW,
+    ICON_RULER,
 )
 
 from . import CONF_MR60BHA2_ID, MR60BHA2Component
@@ -38,13 +38,13 @@ CONF_TARGET_3 = "target_3"
 TARGET_SCHEMA = cv.Schema({
     cv.Optional(CONF_X): sensor.sensor_schema(
         unit_of_measurement=UNIT_METER,
-        icon=ICON_AXIS_ARROW,
+        icon=ICON_RULER,
         accuracy_decimals=2,
         state_class=STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(CONF_Y): sensor.sensor_schema(
         unit_of_measurement=UNIT_METER,
-        icon=ICON_AXIS_ARROW,
+        icon=ICON_RULER,
         accuracy_decimals=2,
         state_class=STATE_CLASS_MEASUREMENT,
     ),
