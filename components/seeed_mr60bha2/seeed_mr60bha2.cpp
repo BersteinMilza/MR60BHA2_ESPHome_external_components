@@ -88,7 +88,7 @@ bool MR60BHA2Component::validate_message_() {
 
   if (frame_type != BREATH_RATE_TYPE_BUFFER && frame_type != HEART_RATE_TYPE_BUFFER &&
       frame_type != DISTANCE_TYPE_BUFFER && frame_type != PEOPLE_EXIST_TYPE_BUFFER &&
-      frame_type != PRINT_CLOUD_BUFFER) {
+      frame_type != PRINT_CLOUD_BUFFER && frame_type != HEART_BREATH_PHASE_BUFFER) { // Added new buffer
     return false;
   }
 
@@ -204,6 +204,24 @@ void MR60BHA2Component::process_frame_(uint16_t frame_id, uint16_t frame_type, c
           break;
         }
         this->num_targets_sensor_->publish_state(current_num_targets_int);
+      }
+      break;
+    case HEART_BREATH_PHASE_BUFFER:
+      if (this->total_phase_sensor_ != nullptr && length >= 12) {
+        float total_phase = esphome::parse_float(data);
+        float breath_phase = esphome::parse_float(data + 4);
+        float heart_phase = esphome::parse_float(data + 8);
+        this->total_phase_sensor_->publish_state(total_phase);
+        this->breath_phase_sensor_->publish_state(breath_phase);
+        this->heart_phase_sensor_->publish_state(heart_phase);
+      }
+      break;
+    case POINT_CLOUD_TARGET_INFO_BUFFER:
+      if (this->target_info_text_sensor_ != nullptr && length > 4) {
+        // Logic to parse all targets and build a JSON string
+        // e.g., {"targets": [{"x": 0.18, "y": 0.49, ...}]}
+        std::string json_output = ...;
+        this->target_info_text_sensor_->publish_state(json_output);
       }
       break;
     default:
