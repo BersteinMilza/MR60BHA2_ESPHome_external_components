@@ -8,7 +8,7 @@
 #include "esphome/components/sensor/sensor.h"
 #endif
 #ifdef USE_TEXT_SENSOR
-#include "esphome/components/text_sensor/text_sensor.h"
+#include "esphome/components/text_sensor/text_sensor.hh"
 #endif
 #include "esphome/components/uart/uart.h"
 #include "esphome/core/automation.h"
@@ -18,6 +18,10 @@
 
 namespace esphome {
 namespace seeed_mr60bha2 {
+
+// Define the maximum number of targets the sensor can track
+#define MAX_TARGETS 3
+
 static const uint8_t FRAME_HEADER_BUFFER = 0x01;
 static const uint16_t PEOPLE_EXIST_TYPE_BUFFER = 0x0F09;
 static const uint16_t HEART_BREATH_PHASE_BUFFER = 0x0A13;
@@ -27,8 +31,7 @@ static const uint16_t DISTANCE_TYPE_BUFFER = 0x0A16;
 static const uint16_t POINT_CLOUD_TARGET_INFO_BUFFER = 0x0A04;
 static const uint16_t FIRMWARE_VERSION_BUFFER = 0xFFFF;
 
-class MR60BHA2Component : public Component,
-                          public uart::UARTDevice {  // The class name must be the name defined by text_sensor.py
+class MR60BHA2Component : public Component, public uart::UARTDevice {
 #ifdef USE_BINARY_SENSOR
   SUB_BINARY_SENSOR(has_target);
 #endif
@@ -40,10 +43,18 @@ class MR60BHA2Component : public Component,
   SUB_SENSOR(total_phase);
   SUB_SENSOR(breath_phase);
   SUB_SENSOR(heart_phase);
+
+  // New sensors for each target's coordinates
+  SUB_SENSOR(target_1_x);
+  SUB_SENSOR(target_1_y);
+  SUB_SENSOR(target_2_x);
+  SUB_SENSOR(target_2_y);
+  SUB_SENSOR(target_3_x);
+  SUB_SENSOR(target_3_y);
 #endif
 #ifdef USE_TEXT_SENSOR
-   SUB_TEXT_SENSOR(target_info);
-   SUB_TEXT_SENSOR(firmware_version);
+  // The target_info text sensor is no longer needed
+  SUB_TEXT_SENSOR(firmware_version);
 #endif
 
  public:
@@ -56,6 +67,10 @@ class MR60BHA2Component : public Component,
   void process_frame_(uint16_t frame_id, uint16_t frame_type, const uint8_t *data, size_t length);
 
   std::vector<uint8_t> rx_message_;
+  
+  // Arrays to hold sensor pointers for easier processing
+  sensor::Sensor *target_x_sensors_[MAX_TARGETS]{nullptr};
+  sensor::Sensor *target_y_sensors_[MAX_TARGETS]{nullptr};
 };
 
 }  // namespace seeed_mr60bha2
