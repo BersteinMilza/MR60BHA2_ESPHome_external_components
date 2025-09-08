@@ -22,7 +22,6 @@ static const uint16_t HEART_RATE_TYPE_BUFFER = 0x0A15;
 static const uint16_t DISTANCE_TYPE_BUFFER = 0x0A16;
 static const uint16_t PRINT_CLOUD_BUFFER = 0x0A04;
 static const uint16_t HEART_BREATH_PHASE_BUFFER = 0x0A13;
-static const uint16_t POINT_CLOUD_TARGET_INFO_BUFFER = 0x0A04;
 static const uint16_t FIRMWARE_VERSION_BUFFER = 0xFFFF;
 
 class MR60BHA2Component : public Component,
