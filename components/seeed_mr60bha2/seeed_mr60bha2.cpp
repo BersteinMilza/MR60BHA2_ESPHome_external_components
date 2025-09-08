@@ -14,13 +14,20 @@ static const char *const TAG = "seeed_mr60bha2";
 void MR60BHA2Component::dump_config() {
   ESP_LOGCONFIG(TAG, "MR60BHA2:");
 #ifdef USE_BINARY_SENSOR
-  LOG_BINARY_SENSOR(" ", "People Exist Binary Sensor", this->has_target_binary_sensor_);
+  LOG_BINARY_SENSOR("  ", "Has Target", this->has_target_binary_sensor_);
 #endif
 #ifdef USE_SENSOR
-  LOG_SENSOR(" ", "Breath Rate Sensor", this->breath_rate_sensor_);
-  LOG_SENSOR(" ", "Heart Rate Sensor", this->heart_rate_sensor_);
-  LOG_SENSOR(" ", "Distance Sensor", this->distance_sensor_);
-  LOG_SENSOR(" ", "Target Number Sensor", this->num_targets_sensor_);
+  LOG_SENSOR("  ", "Breath Rate", this->breath_rate_sensor_);
+  LOG_SENSOR("  ", "Heart Rate", this->heart_rate_sensor_);
+  LOG_SENSOR("  ", "Distance", this->distance_sensor_);
+  LOG_SENSOR("  ", "Number of Targets", this->num_targets_sensor_);
+  LOG_SENSOR("  ", "Total Phase", this->total_phase_sensor_);
+  LOG_SENSOR("  ", "Breath Phase", this->breath_phase_sensor_);
+  LOG_SENSOR("  ", "Heart Phase", this->heart_phase_sensor_);
+#endif
+#ifdef USE_TEXT_SENSOR
+  LOG_TEXT_SENSOR("  ", "Target Info", this->target_info_text_sensor_);
+  LOG_TEXT_SENSOR("  ", "Firmware Version", this->firmware_version_text_sensor_);
 #endif
 }
 
