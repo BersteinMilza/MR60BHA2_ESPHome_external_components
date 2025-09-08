@@ -21,6 +21,9 @@ static const uint16_t PEOPLE_EXIST_TYPE_BUFFER = 0x0F09;
 static const uint16_t HEART_RATE_TYPE_BUFFER = 0x0A15;
 static const uint16_t DISTANCE_TYPE_BUFFER = 0x0A16;
 static const uint16_t PRINT_CLOUD_BUFFER = 0x0A04;
+static const uint16_t HEART_BREATH_PHASE_BUFFER = 0x0A13;
+static const uint16_t POINT_CLOUD_TARGET_INFO_BUFFER = 0x0A04;
+static const uint16_t FIRMWARE_VERSION_BUFFER = 0xFFFF;
 
 class MR60BHA2Component : public Component,
                           public uart::UARTDevice {  // The class name must be the name defined by text_sensor.py
@@ -32,6 +35,13 @@ class MR60BHA2Component : public Component,
   SUB_SENSOR(heart_rate);
   SUB_SENSOR(distance);
   SUB_SENSOR(num_targets);
+  SUB_SENSOR(total_phase);
+  SUB_SENSOR(breath_phase);
+  SUB_SENSOR(heart_phase);
+#endif
+#ifdef USE_TEXT_SENSOR
+   SUB_TEXT_SENSOR(target_info);
+   SUB_TEXT_SENSOR(firmware_version);
 #endif
 
  public:
