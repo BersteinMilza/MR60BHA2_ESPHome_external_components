@@ -3,7 +3,7 @@ from esphome.components import text_sensor
 import esphome.config_validation as cv
 from esphome.const import (
     ICON_CHIP,
-    ICON_INFORMATION,
+    ICON_DATABASE,
 )
 
 from . import CONF_MR60BHA2_ID, MR60BHA2Component
@@ -17,7 +17,7 @@ CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_MR60BHA2_ID): cv.use_id(MR60BHA2Component),
         cv.Optional(CONF_TARGET_INFO): text_sensor.text_sensor_schema(
-            icon=ICON_INFORMATION_OUTLINE
+            icon=ICON_DATABASE
         ),
         cv.Optional(CONF_FIRMWARE_VERSION): text_sensor.text_sensor_schema(
             icon=ICON_CHIP
