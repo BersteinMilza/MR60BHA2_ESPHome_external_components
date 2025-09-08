@@ -11,7 +11,7 @@ from esphome.const import (
     STATE_CLASS_MEASUREMENT,
     UNIT_BEATS_PER_MINUTE,
     UNIT_CENTIMETER,
-    ICON_ROTATE_ORBIT
+    ICON_ROTATE_RIGHT,
 )
 
 from . import CONF_MR60BHA2_ID, MR60BHA2Component
@@ -52,17 +52,18 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_TOTAL_PHASE): sensor.sensor_schema(
             accuracy_decimals=2,
             state_class=STATE_CLASS_MEASUREMENT,
-            icon=ICON_ROTATE_ORBIT,
+            icon=ICON_ROTATE_RIGHT,
         ),
         cv.Optional(CONF_BREATH_PHASE): sensor.sensor_schema(
             accuracy_decimals=2,
             state_class=STATE_CLASS_MEASUREMENT,
-            icon=ICON_ROTATE_ORBIT,
+            icon=ICON_ROTATE_RIGHT,
         ),
         cv.Optional(CONF_HEART_PHASE): sensor.sensor_schema(
             accuracy_decimals=2,
             state_class=STATE_CLASS_MEASUREMENT,
-            icon=ICON_ROTATE_ORBIT,
+            icon=ICON_ROTATE_RIGHT,
+        ),
         ),
     }
 )
