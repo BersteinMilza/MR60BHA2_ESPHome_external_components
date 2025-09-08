@@ -7,6 +7,9 @@
 #ifdef USE_SENSOR
 #include "esphome/components/sensor/sensor.h"
 #endif
+#ifdef USE_TEXT_SENSOR
+#include "esphome/components/text_sensor/text_sensor.h"
+#endif
 #include "esphome/components/uart/uart.h"
 #include "esphome/core/automation.h"
 #include "esphome/core/helpers.h"
@@ -16,12 +19,12 @@
 namespace esphome {
 namespace seeed_mr60bha2 {
 static const uint8_t FRAME_HEADER_BUFFER = 0x01;
-static const uint16_t BREATH_RATE_TYPE_BUFFER = 0x0A14;
 static const uint16_t PEOPLE_EXIST_TYPE_BUFFER = 0x0F09;
+static const uint16_t HEART_BREATH_PHASE_BUFFER = 0x0A13;
+static const uint16_t BREATH_RATE_TYPE_BUFFER = 0x0A14;
 static const uint16_t HEART_RATE_TYPE_BUFFER = 0x0A15;
 static const uint16_t DISTANCE_TYPE_BUFFER = 0x0A16;
-static const uint16_t PRINT_CLOUD_BUFFER = 0x0A04;
-static const uint16_t HEART_BREATH_PHASE_BUFFER = 0x0A13;
+static const uint16_t POINT_CLOUD_TARGET_INFO_BUFFER = 0x0A04;
 static const uint16_t FIRMWARE_VERSION_BUFFER = 0xFFFF;
 
 class MR60BHA2Component : public Component,
