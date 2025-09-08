@@ -88,7 +88,8 @@ bool MR60BHA2Component::validate_message_() {
 
   if (frame_type != BREATH_RATE_TYPE_BUFFER && frame_type != HEART_RATE_TYPE_BUFFER &&
       frame_type != DISTANCE_TYPE_BUFFER && frame_type != PEOPLE_EXIST_TYPE_BUFFER &&
-      frame_type != PRINT_CLOUD_BUFFER && frame_type != HEART_BREATH_PHASE_BUFFER) { // Added new buffer
+      frame_type != POINT_CLOUD_TARGET_INFO_BUFFER && frame_type != HEART_BREATH_PHASE_BUFFER &&
+      frame_type != FIRMWARE_VERSION_BUFFER) {
     return false;
   }
 
@@ -129,102 +130,93 @@ bool MR60BHA2Component::validate_message_() {
 }
 
 void MR60BHA2Component::process_frame_(uint16_t frame_id, uint16_t frame_type, const uint8_t *data, size_t length) {
-  if (this->has_target_binary_sensor_ != nullptr && !this->has_target_binary_sensor_->state &&
-      frame_type != PEOPLE_EXIST_TYPE_BUFFER) {
-    // Do not process other frames while people exists sensor is still false
-    return;
-  }
   switch (frame_type) {
-    case BREATH_RATE_TYPE_BUFFER:
+    case HEART_BREATH_PHASE_BUFFER: {
+      if (length >= 12) {
+        if (this->total_phase_sensor_ != nullptr)
+          this->total_phase_sensor_->publish_state(*reinterpret_cast<const float *>(&data[0]));
+        if (this->breath_phase_sensor_ != nullptr)
+          this->breath_phase_sensor_->publish_state(*reinterpret_cast<const float *>(&data[4]));
+        if (this->heart_phase_sensor_ != nullptr)
+          this->heart_phase_sensor_->publish_state(*reinterpret_cast<const float *>(&data[8]));
+      }
+      break;
+    }
+
+    case BREATH_RATE_TYPE_BUFFER: {
       if (this->breath_rate_sensor_ != nullptr && length >= 4) {
-        uint32_t current_breath_rate_int = encode_uint32(data[3], data[2], data[1], data[0]);
-        if (current_breath_rate_int != 0) {
-          float breath_rate_float;
-          memcpy(&breath_rate_float, &current_breath_rate_int, sizeof(float));
-          if (this->breath_rate_sensor_->state == breath_rate_float) {
-            break;
-          }
-          this->breath_rate_sensor_->publish_state(breath_rate_float);
-        }
+        this->breath_rate_sensor_->publish_state(*reinterpret_cast<const float *>(data));
       }
       break;
-    case PEOPLE_EXIST_TYPE_BUFFER:
-      if (this->has_target_binary_sensor_ != nullptr && length >= 2) {
-        uint16_t has_target_int = encode_uint16(data[1], data[0]);
-        if (this->has_target_binary_sensor_->state == has_target_int) {
-          break;
-        }
-        this->has_target_binary_sensor_->publish_state(has_target_int);
-        if (has_target_int == 0) {
-          if (this->breath_rate_sensor_ != nullptr && this->breath_rate_sensor_->state != 0.0) {
-            this->breath_rate_sensor_->publish_state(0.0);
-          }
-          if (this->heart_rate_sensor_ != nullptr && this->heart_rate_sensor_->state != 0.0) {
-            this->heart_rate_sensor_->publish_state(0.0);
-          }
-          if (this->distance_sensor_ != nullptr && this->distance_sensor_->state != 0.0) {
-            this->distance_sensor_->publish_state(0.0);
-          }
-          if (this->num_targets_sensor_ != nullptr && this->num_targets_sensor_->state != 0) {
-            this->num_targets_sensor_->publish_state(0);
-          }
-        }
-      }
-      break;
-    case HEART_RATE_TYPE_BUFFER:
+    }
+
+    case HEART_RATE_TYPE_BUFFER: {
       if (this->heart_rate_sensor_ != nullptr && length >= 4) {
-        uint32_t current_heart_rate_int = encode_uint32(data[3], data[2], data[1], data[0]);
-        if (current_heart_rate_int != 0) {
-          float heart_rate_float;
-          memcpy(&heart_rate_float, &current_heart_rate_int, sizeof(float));
-          if (this->heart_rate_sensor_->state == heart_rate_float) {
-            break;
+        this->heart_rate_sensor_->publish_state(*reinterpret_cast<const float *>(data));
+      }
+      break;
+    }
+
+    case DISTANCE_TYPE_BUFFER: {
+      if (this->distance_sensor_ != nullptr && length >= 8 && data[0] != 0) {
+        this->distance_sensor_->publish_state(*reinterpret_cast<const float *>(&data[4]));
+      }
+      break;
+    }
+
+    case PEOPLE_EXIST_TYPE_BUFFER: {
+      if (this->has_target_binary_sensor_ != nullptr && length >= 2) {
+        bool detected = encode_uint16(data[1], data[0]);
+        this->has_target_binary_sensor_->publish_state(detected);
+        if (!detected) { // If no one is detected, reset other sensors
+          if (this->breath_rate_sensor_ != nullptr) this->breath_rate_sensor_->publish_state(0);
+          if (this->heart_rate_sensor_ != nullptr) this->heart_rate_sensor_->publish_state(0);
+          if (this->distance_sensor_ != nullptr) this->distance_sensor_->publish_state(0);
+          if (this->num_targets_sensor_ != nullptr) this->num_targets_sensor_->publish_state(0);
+        }
+      }
+      break;
+    }
+
+    case POINT_CLOUD_TARGET_INFO_BUFFER: {
+      if (length >= 4) {
+        uint32_t num_targets = encode_uint32(data[3], data[2], data[1], data[0]);
+        if (this->num_targets_sensor_ != nullptr) {
+          this->num_targets_sensor_->publish_state(num_targets);
+        }
+
+        if (this->target_info_text_sensor_ != nullptr) {
+          std::string json = "{\"targets\":[";
+          const uint8_t *ptr = data + 4;
+          for (int i = 0; i < num_targets; i++) {
+            float x = *reinterpret_cast<const float *>(&ptr[0]);
+            float y = *reinterpret_cast<const float *>(&ptr[4]);
+            int32_t dop_index = *reinterpret_cast<const int32_t *>(&ptr[8]);
+            int32_t cluster_index = *reinterpret_cast<const int32_t *>(&ptr[12]);
+            
+            json += "{\"x\":" + to_string(x) + ",\"y\":" + to_string(y) + ",\"dop_index\":" + to_string(dop_index) + ",\"cluster_index\":" + to_string(cluster_index) + "}";
+            if (i < num_targets - 1) {
+              json += ",";
+            }
+            ptr += 16; // Move to the next target data
           }
-          this->heart_rate_sensor_->publish_state(heart_rate_float);
+          json += "]}";
+          this->target_info_text_sensor_->publish_state(json);
         }
       }
       break;
-    case DISTANCE_TYPE_BUFFER:
-      if (data[0] != 0) {
-        if (this->distance_sensor_ != nullptr && length >= 8) {
-          uint32_t current_distance_int = encode_uint32(data[7], data[6], data[5], data[4]);
-          float distance_float;
-          memcpy(&distance_float, &current_distance_int, sizeof(float));
-          if (this->distance_sensor_->state == distance_float) {
-            break;
-          }
-          this->distance_sensor_->publish_state(distance_float);
-        }
+    }
+
+    case FIRMWARE_VERSION_BUFFER: {
+      if (this->firmware_version_text_sensor_ != nullptr && length >= 4) {
+        std::string fw = to_string(data[1]) + "." + to_string(data[2]) + "." + to_string(data[3]);
+        this->firmware_version_text_sensor_->publish_state(fw);
       }
       break;
-    case PRINT_CLOUD_BUFFER:
-      if (this->num_targets_sensor_ != nullptr && length >= 4) {
-        uint32_t current_num_targets_int = encode_uint32(data[3], data[2], data[1], data[0]);
-        if (this->num_targets_sensor_->state == current_num_targets_int) {
-          break;
-        }
-        this->num_targets_sensor_->publish_state(current_num_targets_int);
-      }
-      break;
-    case HEART_BREATH_PHASE_BUFFER:
-      if (this->total_phase_sensor_ != nullptr && length >= 12) {
-        float total_phase = esphome::parse_float(data);
-        float breath_phase = esphome::parse_float(data + 4);
-        float heart_phase = esphome::parse_float(data + 8);
-        this->total_phase_sensor_->publish_state(total_phase);
-        this->breath_phase_sensor_->publish_state(breath_phase);
-        this->heart_phase_sensor_->publish_state(heart_phase);
-      }
-      break;
-    case POINT_CLOUD_TARGET_INFO_BUFFER:
-      if (this->target_info_text_sensor_ != nullptr && length > 4) {
-        // Logic to parse all targets and build a JSON string
-        // e.g., {"targets": [{"x": 0.18, "y": 0.49, ...}]}
-        std::string json_output = ...;
-        this->target_info_text_sensor_->publish_state(json_output);
-      }
-      break;
+    }
+
     default:
+      ESP_LOGV(TAG, "Unhandled frame type: 0x%04X", frame_type);
       break;
   }
 }
