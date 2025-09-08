@@ -83,4 +83,4 @@ async def to_code(config):
                 cg.add(getattr(mr60bha2_component, f"set_{target_key}_x_sensor")(sens))
             if y_config := target_config.get(CONF_Y):
                 sens = await sensor.new_sensor(y_config)
-                cg.add(getattr(mr6e0bha2_component, f"set_{target_key}_y_sensor")(sens))
+                cg.add(getattr(mr60bha2_component, f"set_{target_key}_y_sensor")(sens))
