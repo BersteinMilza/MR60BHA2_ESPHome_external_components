@@ -11,6 +11,7 @@ from esphome.const import (
     STATE_CLASS_MEASUREMENT,
     UNIT_BEATS_PER_MINUTE,
     UNIT_CENTIMETER,
+    ICON_ROTATE_ORBIT
 )
 
 from . import CONF_MR60BHA2_ID, MR60BHA2Component
@@ -20,6 +21,9 @@ DEPENDENCIES = ["seeed_mr60bha2"]
 CONF_BREATH_RATE = "breath_rate"
 CONF_HEART_RATE = "heart_rate"
 CONF_NUM_TARGETS = "num_targets"
+CONF_TOTAL_PHASE = "total_phase"
+CONF_BREATH_PHASE = "breath_phase"
+CONF_HEART_PHASE = "heart_phase"
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -45,6 +49,21 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_NUM_TARGETS): sensor.sensor_schema(
             icon=ICON_COUNTER,
         ),
+        cv.Optional(CONF_TOTAL_PHASE): sensor.sensor_schema(
+            accuracy_decimals=2,
+            state_class=STATE_CLASS_MEASUREMENT,
+            icon=ICON_ROTATE_ORBIT,
+        ),
+        cv.Optional(CONF_BREATH_PHASE): sensor.sensor_schema(
+            accuracy_decimals=2,
+            state_class=STATE_CLASS_MEASUREMENT,
+            icon=ICON_ROTATE_ORBIT,
+        ),
+        cv.Optional(CONF_HEART_PHASE): sensor.sensor_schema(
+            accuracy_decimals=2,
+            state_class=STATE_CLASS_MEASUREMENT,
+            icon=ICON_ROTATE_ORBIT,
+        ),
     }
 )
 
@@ -63,3 +82,12 @@ async def to_code(config):
     if num_targets_config := config.get(CONF_NUM_TARGETS):
         sens = await sensor.new_sensor(num_targets_config)
         cg.add(mr60bha2_component.set_num_targets_sensor(sens))
+    if total_phase_config := config.get(CONF_TOTAL_PHASE):
+        sens = await sensor.new_sensor(total_phase_config)
+        cg.add(mr60bha2_component.set_total_phase_sensor(sens))
+    if breath_phase_config := config.get(CONF_BREATH_PHASE):
+        sens = await sensor.new_sensor(breath_phase_config)
+        cg.add(mr60bha2_component.set_breath_phase_sensor(sens))
+    if heart_phase_config := config.get(CONF_HEART_PHASE):
+        sens = await sensor.new_sensor(heart_phase_config)
+        cg.add(mr60bha2_component.set_heart_phase_sensor(sens))
