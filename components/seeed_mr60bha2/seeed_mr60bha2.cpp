@@ -24,9 +24,14 @@ void MR60BHA2Component::dump_config() {
   LOG_SENSOR("  ", "Total Phase", this->total_phase_sensor_);
   LOG_SENSOR("  ", "Breath Phase", this->breath_phase_sensor_);
   LOG_SENSOR("  ", "Heart Phase", this->heart_phase_sensor_);
+  LOG_SENSOR("  ", "Target 1 X", this->target_1_x_sensor_);
+  LOG_SENSOR("  ", "Target 1 Y", this->target_1_y_sensor_);
+  LOG_SENSOR("  ", "Target 2 X", this->target_2_x_sensor_);
+  LOG_SENSOR("  ", "Target 2 Y", this->target_2_y_sensor_);
+  LOG_SENSOR("  ", "Target 3 X", this->target_3_x_sensor_);
+  LOG_SENSOR("  ", "Target 3 Y", this->target_3_y_sensor_);
 #endif
 #ifdef USE_TEXT_SENSOR
-  LOG_TEXT_SENSOR("  ", "Target Info", this->target_info_text_sensor_);
   LOG_TEXT_SENSOR("  ", "Firmware Version", this->firmware_version_text_sensor_);
 #endif
 }
@@ -137,6 +142,13 @@ bool MR60BHA2Component::validate_message_() {
 }
 
 void MR60BHA2Component::process_frame_(uint16_t frame_id, uint16_t frame_type, const uint8_t *data, size_t length) {
+  this->target_x_sensors_[0] = this->target_1_x_sensor_;
+  this->target_y_sensors_[0] = this->target_1_y_sensor_;
+  this->target_x_sensors_[1] = this->target_2_x_sensor_;
+  this->target_y_sensors_[1] = this->target_2_y_sensor_;
+  this->target_x_sensors_[2] = this->target_3_x_sensor_;
+  this->target_y_sensors_[2] = this->target_3_y_sensor_;
+  
   switch (frame_type) {
     case HEART_BREATH_PHASE_BUFFER: {
       if (length >= 12) {
@@ -185,30 +197,29 @@ void MR60BHA2Component::process_frame_(uint16_t frame_id, uint16_t frame_type, c
       break;
     }
 
-    case POINT_CLOUD_TARGET_INFO_BUFFER: {
+        case POINT_CLOUD_TARGET_INFO_BUFFER: {
       if (length >= 4) {
         uint32_t num_targets = encode_uint32(data[3], data[2], data[1], data[0]);
         if (this->num_targets_sensor_ != nullptr) {
           this->num_targets_sensor_->publish_state(num_targets);
         }
 
-        if (this->target_info_text_sensor_ != nullptr) {
-          std::string json = "{\"targets\":[";
-          const uint8_t *ptr = data + 4;
-          for (int i = 0; i < num_targets; i++) {
+        const uint8_t *ptr = data + 4;
+        for (int i = 0; i < MAX_TARGETS; i++) {
+          if (i < num_targets) {
+            // This target exists, publish its data
             float x = *reinterpret_cast<const float *>(&ptr[0]);
             float y = *reinterpret_cast<const float *>(&ptr[4]);
-            int32_t dop_index = *reinterpret_cast<const int32_t *>(&ptr[8]);
-            int32_t cluster_index = *reinterpret_cast<const int32_t *>(&ptr[12]);
             
-            json += "{\"x\":" + to_string(x) + ",\"y\":" + to_string(y) + ",\"dop_index\":" + to_string(dop_index) + ",\"cluster_index\":" + to_string(cluster_index) + "}";
-            if (i < num_targets - 1) {
-              json += ",";
-            }
-            ptr += 16; // Move to the next target data
+            if (this->target_x_sensors_[i] != nullptr) this->target_x_sensors_[i]->publish_state(x);
+            if (this->target_y_sensors_[i] != nullptr) this->target_y_sensors_[i]->publish_state(y);
+
+            ptr += 16; // Move pointer to the next target's data block
+          } else {
+            // This target does not exist, publish 0 to clear old values
+            if (this->target_x_sensors_[i] != nullptr) this->target_x_sensors_[i]->publish_state(0.0f);
+            if (this->target_y_sensors_[i] != nullptr) this->target_y_sensors_[i]->publish_state(0.0f);
           }
-          json += "]}";
-          this->target_info_text_sensor_->publish_state(json);
         }
       }
       break;
