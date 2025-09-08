@@ -23,7 +23,7 @@ esp32:
 external_components:
   - source:
       type: git
-      url: https://github.com/limengdu/MR60BHA2_ESPHome_external_components
+      url: https://github.com/BersteinMilza/MR60BHA2_ESPHome_external_components
       ref: main
     components: [ seeed_mr60bha2 ]
     refresh: 0s
@@ -97,3 +97,15 @@ sensor:
       name: "Distance to detection object"
     num_targets:
       name: "Target Number"
+    total_phase:
+      name: "Total Phase"
+    breath_phase:
+      name: "Breath Phase"
+    heart_phase:
+      name: "Heart Phase"
+text_sensor:
+  - platform: seeed_mr60bha2
+    target_info:
+      name: "Target Info"
+    firmware_version:
+      name: "Firmware Version"
