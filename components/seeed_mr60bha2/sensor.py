@@ -52,14 +52,44 @@ TARGET_SCHEMA = cv.Schema({
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(CONF_MR60BHA2_ID): cv.use_id(MR60BHA2Component),
-    cv.Optional(CONF_BREATH_RATE): sensor.sensor_schema(),
-    cv.Optional(CONF_HEART_RATE): sensor.sensor_schema(),
-    cv.Optional(CONF_DISTANCE): sensor.sensor_schema(),
-    cv.Optional(CONF_NUM_TARGETS): sensor.sensor_schema(),
-    cv.Optional(CONF_TOTAL_PHASE): sensor.sensor_schema(),
-    cv.Optional(CONF_BREATH_PHASE): sensor.sensor_schema(),
-    cv.Optional(CONF_HEART_PHASE): sensor.sensor_schema(),
-    # Add new target schemas
+    cv.Optional(CONF_BREATH_RATE): sensor.sensor_schema(
+        accuracy_decimals=0,
+        state_class=STATE_CLASS_MEASUREMENT,
+        unit_of_measurement="RPM",
+        icon=ICON_PULSE,
+    ),
+    cv.Optional(CONF_HEART_RATE): sensor.sensor_schema(
+        accuracy_decimals=0,
+        icon=ICON_HEART_PULSE,
+        state_class=STATE_CLASS_MEASUREMENT,
+        unit_of_measurement="BPM",
+    ),
+    cv.Optional(CONF_DISTANCE): sensor.sensor_schema(
+        device_class=DEVICE_CLASS_DISTANCE,
+        state_class=STATE_CLASS_MEASUREMENT,
+        unit_of_measurement=UNIT_CENTIMETER,
+        accuracy_decimals=2,
+        icon=ICON_SIGNAL,
+    ),
+    cv.Optional(CONF_NUM_TARGETS): sensor.sensor_schema(
+        state_class=STATE_CLASS_MEASUREMENT,
+        icon=ICON_COUNTER,
+    ),
+    cv.Optional(CONF_TOTAL_PHASE): sensor.sensor_schema(
+        state_class=STATE_CLASS_MEASUREMENT,
+        accuracy_decimals=2,
+        icon=ICON_SIGNAL,
+    ),
+    cv.Optional(CONF_BREATH_PHASE): sensor.sensor_schema(
+        state_class=STATE_CLASS_MEASUREMENT,
+        accuracy_decimals=2,
+        icon=ICON_SIGNAL,
+    ),
+    cv.Optional(CONF_HEART_PHASE): sensor.sensor_schema(
+        state_class=STATE_CLASS_MEASUREMENT,
+        accuracy_decimals=2,
+        icon=ICON_SIGNAL,
+    ),
     cv.Optional(CONF_TARGET_1): TARGET_SCHEMA,
     cv.Optional(CONF_TARGET_2): TARGET_SCHEMA,
     cv.Optional(CONF_TARGET_3): TARGET_SCHEMA,
