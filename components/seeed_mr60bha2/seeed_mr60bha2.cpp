@@ -36,6 +36,13 @@ void MR60BHA2Component::dump_config() {
 #endif
 }
 
+struct FirmwareVersion {
+  uint8_t project_name;
+  uint8_t major_version;
+  uint8_t sub_version;
+  uint8_t modified_version;
+};
+
 // main loop
 void MR60BHA2Component::loop() {
   uint8_t byte;
@@ -227,7 +234,14 @@ void MR60BHA2Component::process_frame_(uint16_t frame_id, uint16_t frame_type, c
 
     case FIRMWARE_VERSION_BUFFER: {
       if (this->firmware_version_text_sensor_ != nullptr && length >= 4) {
-        std::string fw = to_string(data[1]) + "." + to_string(data[2]) + "." + to_string(data[3]);
+        // Cast the data buffer to the FirmwareVersion struct
+        const auto *version_info = reinterpret_cast<const FirmwareVersion *>(data);
+        
+        // Construct the firmware string from the struct members
+        std::string fw = to_string(version_info->major_version) + "." +
+                         to_string(version_info->sub_version) + "." +
+                         to_string(version_info->modified_version);
+                         
         this->firmware_version_text_sensor_->publish_state(fw);
       }
       break;
