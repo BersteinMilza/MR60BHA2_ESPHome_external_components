@@ -53,16 +53,17 @@ class MR60BHA2Component : public Component, public uart::UARTDevice {
   SUB_SENSOR(target_3_y);
 #endif
 #ifdef USE_TEXT_SENSOR
-  // The target_info text sensor is no longer needed
   SUB_TEXT_SENSOR(firmware_version);
 #endif
 
  public:
+  void setup() override;
   float get_setup_priority() const override { return esphome::setup_priority::LATE; }
   void dump_config() override;
   void loop() override;
 
  protected:
+  void send_command_(uint16_t frame_type, const uint8_t *data = nullptr, size_t length = 0);
   bool validate_message_();
   void process_frame_(uint16_t frame_id, uint16_t frame_type, const uint8_t *data, size_t length);
 
