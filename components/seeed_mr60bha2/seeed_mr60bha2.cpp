@@ -9,6 +9,54 @@ namespace seeed_mr60bha2 {
 
 static const char *const TAG = "seeed_mr60bha2";
 
+void MR60BHA2Component::send_command_(uint16_t frame_type, const uint8_t *data, size_t length) {
+  std::vector<uint8_t> frame;
+  frame.push_back(FRAME_HEADER_BUFFER);  // SOF
+
+  // Frame ID (using a static value for simplicity)
+  frame.push_back(0x80);
+  frame.push_back(0x00);
+
+  // Data Length
+  frame.push_back(length >> 8);
+  frame.push_back(length & 0xFF);
+
+  // Frame Type
+  frame.push_back(frame_type >> 8);
+  frame.push_back(frame_type & 0xFF);
+
+  // Header Checksum
+  uint8_t header_checksum = 0;
+  for (size_t i = 0; i < 7; i++) {
+    header_checksum ^= frame[i];
+  }
+  header_checksum = ~header_checksum;
+  frame.push_back(header_checksum);
+
+  // Data
+  if (data != nullptr && length > 0) {
+    frame.insert(frame.end(), data, data + length);
+  }
+  
+  // Data Checksum
+  uint8_t data_checksum = 0;
+    for (size_t i = 0; i < length; i++) {
+        data_checksum ^= data[i];
+    }
+  data_checksum = ~data_checksum;
+  frame.push_back(data_checksum);
+
+  this->write_array(frame);
+  this->flush();
+  ESP_LOGD(TAG, "Sent command frame with type: 0x%04X", frame_type);
+}
+
+// This new setup function will run once when the device boots
+void MR60BHA2Component::setup() {
+  ESP_LOGCONFIG(TAG, "Setting up MR60BHA2...");
+  // Request firmware version on startup
+  this->send_command_(FIRMWARE_VERSION_BUFFER);
+}
 // Prints the component's configuration data. dump_config() prints all of the component's configuration
 // items in an easy-to-read format, including the configuration key-value pairs.
 void MR60BHA2Component::dump_config() {
